@@ -1,56 +1,31 @@
 package br.com.infnet;
 
+import br.com.infnet.entity.Client;
+import br.com.infnet.entity.Item;
+import br.com.infnet.entity.Order;
+import br.com.infnet.service.EmailService;
+import br.com.infnet.service.InvoicePrinter;
+
 import java.util.*;
 
 public class App {
     public static void main(String[] args) {
-        Order order = new Order();
-        order.clientName = "João";
-        order.clientEmail = "joao@email.com";
-        order.products.add("Notebook");
-        order.quantities.add(1);
-        order.prices.add(3500.0);
-        order.products.add("Mouse");
-        order.quantities.add(2);
-        order.prices.add(80.0);
-        order.printInvoice();
-        order.sendEmail();
-    }
-}
+        Client client = new Client("João","joao@email.com");
 
-class Order {
-    public String clientName;
-    public String clientEmail;
-    public List<String> products = new ArrayList<>();
-    public List<Integer> quantities = new ArrayList<>();
-    public List<Double> prices = new ArrayList<>();
-    public double discountRate = 0.1;
+        List<Item> items = new ArrayList<>();
 
-    public void printInvoice() {
-        double total = 0;
-        System.out.println("Cliente: " + clientName);
-        for (int i = 0; i < products.size(); i++) {
-            System.out.println(quantities.get(i) + "x " + products.get(i) + " - R$" + prices.get(i));
-            total += prices.get(i) * quantities.get(i);
-        }
-        System.out.println("Subtotal: R$" + total);
-        System.out.println("Desconto: R$" + (total * discountRate));
-        System.out.println("Total final: R$" + (total * (1 - discountRate)));
-    }
+        Item notebook = new Item("Notebook", 3500.0, 1);
+        Item mouse = new Item("Mouse", 80.0, 2);
 
-    public void sendEmail() {
-        EmailService.sendEmail(clientEmail, "Pedido recebido! Obrigado pela compra.");
-    }
-}
+        items.add(notebook);
+        items.add(mouse);
 
-class EmailService {
-    public static void sendEmail(String to, String message) {
-        System.out.println("Enviando e-mail para " + to + ": " + message);
-    }
-}
+        Order order = new Order(client, items);
 
-class DiscountPolicy {
-    public static double calculateDiscount(double amount, double rate) {
-        return amount * rate;
+        InvoicePrinter printer = new InvoicePrinter();
+        EmailService  emailService = new EmailService();
+
+        printer.print(order);
+        emailService.sendEmail(client.getClientName(),"Pedido recebido! Obrigado pela compra.");
     }
 }
